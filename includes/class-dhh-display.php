@@ -1,12 +1,6 @@
 <?php
-/**
- * Front-end renderer for the DHH TV Display.
- *
- * Registers a dedicated route (/tv-display/) that outputs a complete, standalone
- * HTML document and exits — the active theme never wraps it, so the kiosk output
- * is identical on any site. Config (API URL, logo, timings) is injected from PHP
- * so the same plugin works on sandbox and live with no manual editing.
- */
+
+/* Front-end renderer for the DHH TV Display */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
