@@ -279,7 +279,7 @@ body {
   font-size: 28px;
   font-weight: 800;
   color: var(--dhh-green);
-  margin: 0 0 22px;
+  margin: 0 0 22px !important;
 }
 
 .about-why ul {
@@ -571,13 +571,13 @@ body {
 }
 
 .community-card .cc-image {
-  height: 55%;
+  height: 65%;
   background-size: cover;
   background-position: center center;
 }
 
 .community-card:first-child .cc-image {
-  background-position: center 75%;
+  background-position: center 35%;
 }
 
 .community-card .cc-text {
