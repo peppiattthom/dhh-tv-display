@@ -3,7 +3,7 @@
  * Plugin Name:       DHH TV Display
  * Plugin URI:        https://www.dhhpanelproducts.co.uk/
  * Description:       Self-contained reception TV kiosk display for DHH Panel Products. Provides the REST API and the full-screen slideshow at /tv-display/.
- * Version:           1.6.1
+ * Version:           1.6.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            NP Consulting Group
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'DHH_DISPLAY_VERSION', '1.6.1' );
+define( 'DHH_DISPLAY_VERSION', '1.6.2' );
 define( 'DHH_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DHH_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -31,7 +31,6 @@ if ( $dhh_puc_repo && file_exists( $dhh_puc_file ) ) {
 		__FILE__,
 		'dhh-tv-display'
 	);
-	$dhh_updater->setBranch( 'main' );
 
 	if ( defined( 'DHH_DISPLAY_GITHUB_TOKEN' ) && DHH_DISPLAY_GITHUB_TOKEN ) {
 		$dhh_updater->setAuthentication( DHH_DISPLAY_GITHUB_TOKEN );
