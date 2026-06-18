@@ -1,0 +1,674 @@
+/*
+ DHH TV Display — Stylesheet
+ Nunito Sans @font-face is injected by PHP (points at wherever the
+ .woff2 files live). Install it from the TV Display admin page, or
+ drop the files into /assets/fonts/ manually.
+*/
+
+/* Reset (overrides theme CSS) */
+*, *::before, *::after {
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+:root {
+  --dhh-green: #3c7f3d;
+  --dhh-green-dark: #2d5f2e;
+  --dhh-accent: #a8bd3c;
+  --dhh-text: #4d4d4d;
+  --dhh-white: #ffffff;
+  --dhh-off-white: #f8f9f5;
+}
+
+html, body {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  font-family: 'Nunito Sans', sans-serif !important;
+  background: #111 !important;
+  color: var(--dhh-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Centre the stage; letterbox bars (if any) show the #111 background. */
+body {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Display container — fixed 1920x1080 stage, scaled to fit by JS */
+.display-wrap {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  transform-origin: center center;
+}
+
+/* Slides */
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+  display: flex;
+  overflow: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Top Bar (persistent on slides 2+) */
+.top-bar {
+  position: relative;
+  width: 1920px;
+  height: 75px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px !important;
+  background: var(--dhh-green);
+  z-index: 10;
+}
+
+.top-bar .tb-logo img { height: 40px; }
+
+.top-bar .tb-clock {
+  text-align: right;
+  line-height: 1.2;
+}
+
+.top-bar .tb-time {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--dhh-white);
+}
+
+.top-bar .tb-date {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--dhh-white);
+}
+
+/* Progress Bar (width + timing set inline by JS) */
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: var(--dhh-accent);
+  z-index: 100;
+  width: 0%;
+}
+
+/* Indicator Dots — sit on a translucent capsule so they read on any slide */
+.slide-indicators {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+  padding: 9px 16px;
+  border-radius: 30px;
+  background: rgba(0,0,0,0.32);
+  backdrop-filter: blur(2px);
+}
+
+.slide-indicators .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transition: all 0.4s ease;
+}
+
+.slide-indicators .dot.active {
+  background: var(--dhh-accent);
+  transform: scale(1.15);
+}
+
+/* SLIDE: WELCOME */
+.slide--welcome {
+  background: url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2022/02/KOSKISEN-Dawn-Birch-Forest.jpg') center/cover no-repeat;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.slide--welcome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 60, 25, 0.7);
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 44px;
+}
+
+.welcome-content .logo-main { width: 460px; }
+
+.welcome-divider {
+  width: 140px;
+  height: 4px;
+  background: var(--dhh-accent);
+}
+
+.welcome-content h1 {
+  font-size: 80px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.welcome-content .welcome-sub {
+  font-size: 32px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  margin-top: 0;
+  max-width: 1200px;
+}
+
+.welcome-features {
+  display: flex;
+  gap: 110px;
+  margin-top: 60px;
+}
+
+.welcome-features .wf-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.welcome-features .wf-icon {
+  width: 104px;
+  height: 104px;
+  border: 2px solid rgba(168, 189, 60, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-features .wf-icon img {
+  width: 48px;
+  height: 48px;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+/* SLIDE: ABOUT  (full-bleed image + white overlay) */
+.slide--about {
+  flex-direction: column;
+  color: var(--dhh-text);
+}
+
+.about-bg {
+  position: absolute;
+  top: 75px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2022/02/KOSKISEN-Dawn-Birch-Forest.jpg') center/cover no-repeat;
+}
+
+.about-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.97) 0%,
+    rgba(255,255,255,0.95) 48%,
+    rgba(255,255,255,0.75) 66%,
+    rgba(255,255,255,0) 88%);
+}
+
+.about-text {
+  position: relative;
+  z-index: 2;
+  width: 66%;
+  flex: 1;
+  padding: 56px 70px 56px 80px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.label-tag {
+  display: inline-block;
+  background: rgba(60, 127, 61, 0.14);
+  color: var(--dhh-green);
+  padding: 9px 26px !important;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: 30px;
+  align-self: flex-start;
+}
+
+.about-text h2 {
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--dhh-green);
+  margin: 0;
+  max-width: 1100px;
+}
+
+.about-text p {
+  font-size: 24px;
+  line-height: 1.55;
+  color: #4d4d4d;
+  font-weight: 400;
+  max-width: 1080px;
+}
+
+.about-why h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dhh-green);
+  margin: 0 0 22px;
+}
+
+.about-why ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about-why li {
+  position: relative;
+  padding-left: 38px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #4d4d4d;
+}
+
+.about-why li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dhh-accent);
+}
+
+.about-stats-line {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--dhh-green);
+  margin-top: 4px;
+}
+
+.about-stats-line .sep {
+  color: rgba(60,127,61,0.4);
+  font-weight: 400;
+  margin: 0 14px;
+}
+
+.about-safe {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8c8f94;
+}
+
+.cert-logos {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.cert-logos img { height: 72px; }
+
+/* SLIDES: NEWS (dynamic) — clean image/text split, sides alternate */
+.slide--news {
+  flex-direction: column;
+}
+
+.slide--news .news-split {
+  display: flex;
+  flex: 1;
+  width: 1920px;
+}
+
+/* .reverse flips image to the right, text to the left */
+.slide--news.reverse .news-split {
+  flex-direction: row-reverse;
+}
+
+.slide--news .news-image {
+  width: 50%;
+  background-size: cover;
+  background-position: center;
+}
+
+.slide--news .news-image--empty {
+  background: linear-gradient(135deg, var(--dhh-green) 0%, var(--dhh-green-dark) 100%);
+}
+
+.slide--news .news-text {
+  width: 50%;
+  padding: 70px 80px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  background: var(--dhh-white);
+  color: var(--dhh-text);
+}
+
+.slide--news .news-text .label-tag {
+  background: rgba(60, 127, 61, 0.15);
+}
+
+.slide--news .news-text h2 {
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--dhh-green);
+  margin: 0;
+}
+
+.slide--news .news-text .news-excerpt {
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #4d4d4d;
+}
+
+/* QR Code block (shared) */
+.news-qr {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 14px;
+}
+
+.news-qr img {
+  width: 118px;
+  height: 118px;
+  border-radius: 8px;
+}
+
+.news-qr .qr-label {
+  font-size: 21px;
+  line-height: 1.5;
+}
+
+.news-qr .qr-label strong {
+  color: var(--dhh-accent);
+  font-weight: 700;
+  display: block;
+}
+
+.news-qr .qr-label span {
+  color: #999;
+  font-weight: 400;
+}
+
+/* SLIDE: PRODUCTS */
+.slide--products {
+  flex-direction: column;
+  background: var(--dhh-off-white);
+}
+
+.products-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 38px;
+  padding: 44px 90px 60px !important;
+  width: 1920px;
+}
+
+.products-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.products-body h2 {
+  font-size: 54px;
+  font-weight: 800;
+  color: var(--dhh-green);
+  margin: 0;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1740px;
+  flex: 1;
+}
+
+.product-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 22px 26px !important;
+  background-size: cover;
+  background-position: center;
+}
+
+.products-head .label-tag {
+  align-self: center;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(45,95,46,0.88) 100%);
+}
+
+.product-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: var(--dhh-accent);
+}
+
+.product-card .pc-name {
+  position: relative;
+  z-index: 2;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dhh-white);
+  line-height: 1.2;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.45);
+}
+
+/* SLIDE: COMMUNITY */
+.slide--community {
+  flex-direction: column;
+  background: var(--dhh-white);
+  color: var(--dhh-text);
+}
+
+.community-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 90px 60px !important;
+  width: 1920px;
+  gap: 42px;
+}
+
+.community-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.community-head h2 {
+  font-size: 54px;
+  font-weight: 800;
+  color: var(--dhh-green);
+  margin: 0;
+}
+
+.community-intro {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #666;
+  max-width: 1100px;
+}
+
+.community-cards {
+  display: flex;
+  gap: 36px;
+  flex: 1;
+  width: 100%;
+  max-width: 1740px;
+}
+
+.community-card {
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e8e8e8;
+}
+
+.community-card .cc-image {
+  height: 55%;
+  background-size: cover;
+  background-position: center top;
+}
+
+.community-card .cc-text {
+  flex: 1;
+  padding: 32px 36px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--dhh-white);
+}
+
+.community-card .cc-text h3 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--dhh-green);
+  margin: 0;
+}
+
+.community-card .cc-text p {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #4d4d4d;
+  margin: 0;
+}
+
+/* SLIDE: CONTACT */
+.slide--contact {
+  background: url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2021/08/delivery-truck.jpg') center/cover no-repeat;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.slide--contact::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(25, 50, 25, 0.75);
+}
+
+.contact-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.contact-content .logo-main { width: 420px; }
+
+.contact-content h2 {
+  font-size: 58px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.contact-content h2 strong {
+  color: var(--dhh-accent);
+  font-weight: 700;
+}
+
+.contact-grid {
+  display: flex;
+  gap: 120px;
+  margin-top: 24px;
+}
+
+.contact-grid .cg-item {
+  text-align: center;
+}
+
+.contact-grid .cg-label {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--dhh-accent);
+  margin-bottom: 10px;
+}
+
+.contact-grid .cg-value {
+  font-size: 30px;
+  font-weight: 400;
+}
