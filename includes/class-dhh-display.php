@@ -312,7 +312,7 @@ class DHH_Display_Render {
           <div class="cc-image" style="background-image:url('https://dhhtest.wpenginepowered.com/wp-content/uploads/2026/06/Football-Sponsorship-Image.png')"></div>
           <div class="cc-text">
             <h3>Corringham Athletic FC</h3>
-            <p>Proud sponsors since Under 6s. The Yellow team earned promotion this season &mdash; a brilliant achievement for the players, coaches and parents. Founded in 1976, Corringham Athletic continues to do a fantastic job supporting youth football.</p>
+            <p>Proud sponsors since Under 6s. The Yellow team earned promotion this season which was a brilliant achievement for the players, coaches and parents. Founded in 1976, Corringham Athletic continues to do a fantastic job supporting youth football.</p>
           </div>
         </div>
         <div class="community-card">
