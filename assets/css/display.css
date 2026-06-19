@@ -244,7 +244,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 14px;
+  gap: 20px;
 }
 
 .label-tag {
@@ -336,7 +336,7 @@ body {
   display: flex;
   gap: 40px;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .cert-logos img { height: 72px; }
@@ -577,7 +577,7 @@ body {
 }
 
 .community-card:first-child .cc-image {
-  background-position: center 38%;
+  background-position: center 40%;
 }
 
 .community-card .cc-text {
