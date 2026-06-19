@@ -334,9 +334,9 @@ body {
 
 .cert-logos {
   display: flex;
-  gap: 36px;
+  gap: 40px;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 20px;
 }
 
 .cert-logos img { height: 72px; }
