@@ -53,7 +53,7 @@ auto-update. No wp-config.php access needed for public repos.
 
 == Changelog ==
 
-= 1.6.1 to 1.6.4 =
+= 1.6.1 to 1.6.5 =
 * Stylesheet changes and fixes.
 
 = 1.6.0 =
