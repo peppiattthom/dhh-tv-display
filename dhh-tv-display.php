@@ -3,11 +3,11 @@
  * Plugin Name:       DHH TV Display
  * Plugin URI:        https://www.dhhpanelproducts.co.uk/
  * Description:       Self-contained reception TV kiosk display for DHH Panel Products
- * Version:           1.7.1
+ * Version:           1.7.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            NP Consulting Group
- * Author URI:        https://blackwatercreative.co.uk/
+ * Author URI:        https://npc-group.co.uk/
  * License:           GPL-2.0-or-later
  * Text Domain:       dhh-tv-display
  * The kiosk loads:  https://YOURSITE/tv-display/
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; 
 }
 
-define( 'DHH_DISPLAY_VERSION', '1.7.1' );
+define( 'DHH_DISPLAY_VERSION', '1.7.2' );
 define( 'DHH_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DHH_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
 
