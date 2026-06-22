@@ -178,7 +178,7 @@ class DHH_Display_Render {
       <img class="logo-main" src="{$logo}" alt="DHH Panel Products">
       <div class="welcome-divider"></div>
       <h1>Welcome to DHH Panel Products</h1>
-      <div class="welcome-sub">UK's Largest Independent Importer &amp; Distributor of Panel Products</div>
+      <div class="welcome-sub">UK's Oldest Independent Importer &amp; Distributor of Panel Products</div>
       <div class="welcome-features">
         <div class="wf-item">
           <div class="wf-icon"><img src="https://www.dhhpanelproducts.co.uk/wp-content/uploads/2021/08/cup.svg" alt=""></div>
@@ -221,7 +221,7 @@ class DHH_Display_Render {
           <li>Flexible, customer-based service</li>
         </ul>
       </div>
-      <div class="about-stats-line">35+ Years in Business <span class="sep">|</span> 350+ Years Combined Experience <span class="sep">|</span> 12+ Product Ranges</div>
+      <div class="about-stats-line">35+ Years in Business <span class="sep">|</span> 350+ Years Combined Experience <span class="sep">|</span> Over 3,000 Product Lines</div>
       <div class="about-safe">The Safe &amp; Legal Choice</div>
       <div class="cert-logos">
         <img src="https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/02/fsc-logo.svg" alt="FSC">
@@ -276,14 +276,14 @@ class DHH_Display_Render {
       </div>
       <div class="community-cards">
         <div class="community-card">
-          <div class="cc-image" style="background-image:url('https://dhhtest.wpenginepowered.com/wp-content/uploads/2026/06/Football-Sponsorship-Image.png')"></div>
+          <div class="cc-image" style="background-image:url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/06/DHH-Football-Sponsorship-Image.webp')"></div>
           <div class="cc-text">
             <h3>Corringham Athletic FC</h3>
             <p>Proud sponsors since Under 6s. The Yellow team earned promotion this season which was a brilliant achievement for the players, coaches and parents. Founded in 1976, Corringham Athletic continues to do a fantastic job supporting youth football.</p>
           </div>
         </div>
         <div class="community-card">
-          <div class="cc-image" style="background-image:url('https://dhhtest.wpenginepowered.com/wp-content/uploads/2026/06/DHH-Panels-Low-Resx2.jpg')"></div>
+          <div class="cc-image" style="background-image:url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/06/DHH-Panels-Low-Resx2.jpg')"></div>
           <div class="cc-text">
             <h3>Rayleigh Cricket Club</h3>
             <p>Teamwear sponsor until 2027. Over ten years of partnership through our &lsquo;Helping Communities Grow&rsquo; initiative, championing the club and the green spaces our communities depend on.</p>
