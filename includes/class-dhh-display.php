@@ -16,9 +16,6 @@ class DHH_Display_Render {
 		add_action( 'template_redirect', array( $this, 'maybe_render' ) );
 	}
 
-	/**
-	 * Pretty URL: /tv-display/  (fallback: /?dhh_display=1).
-	 */
 	public function add_rewrite() {
 		add_rewrite_rule( '^tv-display/?$', 'index.php?' . self::QUERY_VAR . '=1', 'top' );
 	}
@@ -28,9 +25,6 @@ class DHH_Display_Render {
 		return $vars;
 	}
 
-	/**
-	 * If our query var is present, render the kiosk and stop.
-	 */
 	public function maybe_render() {
 		if ( ! get_query_var( self::QUERY_VAR ) ) {
 			return;
@@ -39,49 +33,33 @@ class DHH_Display_Render {
 		exit;
 	}
 
-	/** Option key for user settings. */
 	const OPTION = 'dhh_display_settings';
 
-	/** Font weights used by the display. */
 	const FONT_WEIGHTS = array( 300, 400, 600, 700, 800, 900 );
 
-	/**
-	 * Default, user-editable settings (units are human-friendly).
-	 */
 	public static function defaults() {
 		return array(
-			'post_count'      => 3,
-			'cover_seconds'   => 10,
-			'about_seconds'   => 14,
-			'news_seconds'    => 12,
-			'product_seconds'   => 12,
-			'community_seconds' => 14,
-			'end_seconds'       => 10,
+			'post_count'      => 4,
+			'cover_seconds'   => 20,
+			'about_seconds'   => 30,
+			'news_seconds'    => 20,
+			'product_seconds'   => 30,
+			'community_seconds' => 20,
+			'end_seconds'       => 20,
 			'refresh_minutes' => 10,
 			'logo_url'        => 'https://dhhpanelproducts.co.uk/wp-content/uploads/2021/08/dhh-panel-products-white.svg',
-			'github_repo'     => '',
+			'github_repo'     => 'https://github.com/peppiattthom/dhh-tv-display/',
 		);
 	}
 
-	/**
-	 * Saved settings merged over defaults.
-	 */
 	public static function get_settings() {
 		return wp_parse_args( get_option( self::OPTION, array() ), self::defaults() );
 	}
 
-	/**
-	 * The public REST endpoint URL for the display.
-	 */
 	public static function api_url() {
 		return esc_url_raw( home_url( '/wp-json/dhh-display/v1/posts' ) );
 	}
 
-	/**
-	 * Where are the font files? Prefers the uploads copy (installed via the
-	 * admin), then the bundled plugin copy. Returns source, url, dir and the
-	 * list of weights actually present.
-	 */
 	public static function font_dir_info() {
 		$up = wp_upload_dir();
 
@@ -116,10 +94,6 @@ class DHH_Display_Render {
 		return array( 'source' => 'none', 'url' => '', 'dir' => '', 'weights' => array() );
 	}
 
-	/**
-	 * Build the runtime config injected into the page.
-	 * Filterable via 'dhh_display_config' for per-site overrides.
-	 */
 	private function get_config() {
 		$s = self::get_settings();
 
@@ -144,9 +118,6 @@ class DHH_Display_Render {
 		return apply_filters( 'dhh_display_config', $config );
 	}
 
-	/**
-	 * Build the @font-face CSS for whichever weights are installed.
-	 */
 	private function font_face_css() {
 		$font = self::font_dir_info();
 		if ( empty( $font['weights'] ) ) {
@@ -160,9 +131,6 @@ class DHH_Display_Render {
 		return $css;
 	}
 
-	/**
-	 * Output the standalone kiosk document.
-	 */
 	private function render() {
 		if ( ! headers_sent() ) {
 			header( 'Content-Type: text/html; charset=utf-8' );
@@ -188,7 +156,6 @@ class DHH_Display_Render {
 <meta name="robots" content="noindex, nofollow">
 <title>DHH Panel Products — TV Display</title>
 
-<!-- Speed up the connections to the image CDN and QR service -->
 <link rel="preconnect" href="https://www.dhhpanelproducts.co.uk" crossorigin>
 <link rel="preconnect" href="https://dhhpanelproducts.co.uk" crossorigin>
 <link rel="preconnect" href="https://api.qrserver.com" crossorigin>
