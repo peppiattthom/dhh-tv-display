@@ -1,11 +1,5 @@
-/*
- DHH TV Display — Stylesheet
- Nunito Sans @font-face is injected by PHP (points at wherever the
- .woff2 files live). Install it from the TV Display admin page, or
- drop the files into /assets/fonts/ manually.
-*/
+/* DHH TV Display — Stylesheet */
 
-/* Reset (overrides theme CSS) */
 *, *::before, *::after {
   margin: 0 !important;
   box-sizing: border-box !important;
@@ -30,14 +24,13 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Centre the stage; letterbox bars (if any) show the #111 background. */
 body {
   display: flex !important;
   align-items: center;
   justify-content: center;
 }
 
-/* Display container — fixed 1920x1080 stage, scaled to fit by JS */
+/* Display container */
 .display-wrap {
   position: relative;
   width: 1920px;
@@ -67,7 +60,7 @@ body {
   z-index: 2;
 }
 
-/* Top Bar (persistent on slides 2+) */
+/* Top Bar */
 .top-bar {
   position: relative;
   width: 1920px;
@@ -101,7 +94,7 @@ body {
   color: var(--dhh-white);
 }
 
-/* Progress Bar (width + timing set inline by JS) */
+/* Progress Bar */
 .progress-bar {
   position: absolute;
   bottom: 0;
@@ -112,7 +105,7 @@ body {
   width: 0%;
 }
 
-/* Indicator Dots — sit on a translucent capsule so they read on any slide */
+/* Indicator Dots */
 .slide-indicators {
   position: absolute;
   bottom: 22px;
@@ -223,7 +216,7 @@ body {
   opacity: 0.85;
 }
 
-/* SLIDE: ABOUT  (full-bleed image + white overlay) */
+/* SLIDE: ABOUT */
 .slide--about {
   flex-direction: column;
   color: var(--dhh-text);
@@ -258,7 +251,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 22px;
+  gap: 18px;
 }
 
 .label-tag {
@@ -279,6 +272,10 @@ body {
   color: var(--dhh-green);
   margin: 0;
   max-width: 1100px;
+}
+
+.about-text h2 + p {
+  margin-top: -4px !important;
 }
 
 .about-text p {
@@ -348,9 +345,9 @@ body {
 
 .cert-logos {
   display: flex;
-  gap: 36px;
+  gap: 40px;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 30px;
 }
 
 .cert-logos img { height: 72px; }
@@ -454,7 +451,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 38px;
-  padding: 44px 90px 60px !important;
+  padding: 44px 90px 90px !important;
   width: 1920px;
 }
 
@@ -536,7 +533,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 50px 90px 60px !important;
+  padding: 50px 90px 90px !important;
   width: 1920px;
   gap: 42px;
 }
@@ -554,6 +551,10 @@ body {
   font-weight: 800;
   color: var(--dhh-green);
   margin: 0;
+}
+
+.community-head .label-tag {
+  align-self: center;
 }
 
 .community-intro {
@@ -582,9 +583,13 @@ body {
 }
 
 .community-card .cc-image {
-  height: 55%;
+  height: 65%;
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
+}
+
+.community-card:first-child .cc-image {
+  background-position: center 40%;
 }
 
 .community-card .cc-text {
