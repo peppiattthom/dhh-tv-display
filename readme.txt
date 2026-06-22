@@ -53,7 +53,9 @@ auto-update. No wp-config.php access needed for public repos.
 
 == Changelog ==
 
-= 1.6.1 to 1.6.6 =
+= 1.6.1 to 1.6.7 =
+* Return array defaults amended (4 posts / slide timings).
+* Plugin customisation options added.
 * Stylesheet and display fixes.
 
 = 1.6.0 =
