@@ -251,7 +251,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  gap: 28px;
 }
 
 .label-tag {
@@ -290,7 +290,7 @@ body {
   font-size: 28px;
   font-weight: 800;
   color: var(--dhh-green);
-  margin: 0 0 22px;
+  margin: 0 0 22px !important;
 }
 
 .about-why ul {
@@ -347,7 +347,7 @@ body {
   display: flex;
   gap: 40px;
   align-items: center;
-  margin-top: 30px;
+  margin-top: 10px !important;
 }
 
 .cert-logos img { height: 72px; }
