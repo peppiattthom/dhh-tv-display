@@ -2,24 +2,36 @@
 /**
  * Plugin Name:       DHH TV Display
  * Plugin URI:        https://www.dhhpanelproducts.co.uk/
- * Description:       Self-contained reception TV kiosk display for DHH Panel Products. Provides the REST API and the full-screen slideshow at /tv-display/.
- * Version:           1.6.8
+ * Description:        Self-contained reception TV kiosk display for DHH Panel Products. Provides the REST API and the full-screen slideshow at /tv-display/.
+ * Version:           1.7.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            NP Consulting Group
- * Author URI:        https://npc-group.co.uk
+ * Author:            Blackwater Creative
+ * Author URI:        https://blackwatercreative.co.uk/
  * License:           GPL-2.0-or-later
  * Text Domain:       dhh-tv-display
+ *
+ * The kiosk loads:  https://YOURSITE/tv-display/
+ * Fallback URL:     https://YOURSITE/?dhh_display=1   (works even if permalinks aren't flushed)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'DHH_DISPLAY_VERSION', '1.6.8' );
+define( 'DHH_DISPLAY_VERSION', '1.7.0' );
 define( 'DHH_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DHH_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
 
+/*
+ * Remote updates via GitHub (public or private repo).
+ *
+ * Set the repo URL in TV Display > Settings. For private repos, add a token
+ * constant to wp-config.php:
+ *   define( 'DHH_DISPLAY_GITHUB_TOKEN', 'github_pat_XXXX' );
+ *
+ * The Plugin Update Checker library must be in /lib/plugin-update-checker/.
+ */
 $dhh_puc_file = DHH_DISPLAY_DIR . 'lib/plugin-update-checker/plugin-update-checker.php';
 $dhh_puc_repo = get_option( 'dhh_display_settings', array() );
 $dhh_puc_repo = isset( $dhh_puc_repo['github_repo'] ) ? $dhh_puc_repo['github_repo'] : '';
@@ -31,7 +43,9 @@ if ( $dhh_puc_repo && file_exists( $dhh_puc_file ) ) {
 		__FILE__,
 		'dhh-tv-display'
 	);
+	$dhh_updater->setBranch( 'main' );
 
+	// Optional: private repo token (set in wp-config.php if needed).
 	if ( defined( 'DHH_DISPLAY_GITHUB_TOKEN' ) && DHH_DISPLAY_GITHUB_TOKEN ) {
 		$dhh_updater->setAuthentication( DHH_DISPLAY_GITHUB_TOKEN );
 	}
@@ -41,6 +55,9 @@ require_once DHH_DISPLAY_DIR . 'includes/class-dhh-rest.php';
 require_once DHH_DISPLAY_DIR . 'includes/class-dhh-display.php';
 require_once DHH_DISPLAY_DIR . 'includes/class-dhh-admin.php';
 
+/**
+ * Boot the plugin.
+ */
 function dhh_display_init() {
 	new DHH_Display_REST();
 	new DHH_Display_Render();
@@ -50,6 +67,9 @@ function dhh_display_init() {
 }
 add_action( 'plugins_loaded', 'dhh_display_init' );
 
+/**
+ * On activation: register the rewrite rule, then flush so /tv-display/ resolves.
+ */
 function dhh_display_activate() {
 	require_once DHH_DISPLAY_DIR . 'includes/class-dhh-display.php';
 	$render = new DHH_Display_Render();
@@ -58,6 +78,9 @@ function dhh_display_activate() {
 }
 register_activation_hook( __FILE__, 'dhh_display_activate' );
 
+/**
+ * On deactivation: flush rewrite rules and clear the REST cache.
+ */
 function dhh_display_deactivate() {
 	flush_rewrite_rules();
 	for ( $i = 1; $i <= 10; $i++ ) {

@@ -1,6 +1,12 @@
 <?php
-
-/* Front-end renderer for the DHH TV Display */
+/**
+ * Front-end renderer for the DHH TV Display.
+ *
+ * Registers a dedicated route (/tv-display/) that outputs a complete, standalone
+ * HTML document and exits — the active theme never wraps it, so the kiosk output
+ * is identical on any site. Config (API URL, logo, timings) is injected from PHP
+ * so the same plugin works on sandbox and live with no manual editing.
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,6 +22,9 @@ class DHH_Display_Render {
 		add_action( 'template_redirect', array( $this, 'maybe_render' ) );
 	}
 
+	/**
+	 * Pretty URL: /tv-display/  (fallback: /?dhh_display=1).
+	 */
 	public function add_rewrite() {
 		add_rewrite_rule( '^tv-display/?$', 'index.php?' . self::QUERY_VAR . '=1', 'top' );
 	}
@@ -25,6 +34,9 @@ class DHH_Display_Render {
 		return $vars;
 	}
 
+	/**
+	 * If our query var is present, render the kiosk and stop.
+	 */
 	public function maybe_render() {
 		if ( ! get_query_var( self::QUERY_VAR ) ) {
 			return;
@@ -33,33 +45,50 @@ class DHH_Display_Render {
 		exit;
 	}
 
+	/** Option key for user settings. */
 	const OPTION = 'dhh_display_settings';
 
+	/** Font weights used by the display. */
 	const FONT_WEIGHTS = array( 300, 400, 600, 700, 800, 900 );
 
+	/**
+	 * Default, user-editable settings (units are human-friendly).
+	 */
 	public static function defaults() {
 		return array(
-			'post_count'      => 4,
-			'cover_seconds'   => 20,
-			'about_seconds'   => 30,
-			'news_seconds'    => 20,
+			'post_count'        => 4,
+			'pinned_posts'      => array(),
+			'cover_seconds'     => 20,
+			'about_seconds'     => 30,
+			'news_seconds'      => 20,
 			'product_seconds'   => 30,
 			'community_seconds' => 20,
 			'end_seconds'       => 20,
-			'refresh_minutes' => 10,
-			'logo_url'        => 'https://dhhpanelproducts.co.uk/wp-content/uploads/2021/08/dhh-panel-products-white.svg',
-			'github_repo'     => 'https://github.com/peppiattthom/dhh-tv-display/',
+			'refresh_minutes'   => 10,
+			'logo_url'          => 'https://dhhpanelproducts.co.uk/wp-content/uploads/2021/08/dhh-panel-products-white.svg',
+			'github_repo'       => 'https://github.com/peppiattthom/dhh-tv-display/',
 		);
 	}
 
+	/**
+	 * Saved settings merged over defaults.
+	 */
 	public static function get_settings() {
 		return wp_parse_args( get_option( self::OPTION, array() ), self::defaults() );
 	}
 
+	/**
+	 * The public REST endpoint URL for the display.
+	 */
 	public static function api_url() {
 		return esc_url_raw( home_url( '/wp-json/dhh-display/v1/posts' ) );
 	}
 
+	/**
+	 * Where are the font files? Prefers the uploads copy (installed via the
+	 * admin), then the bundled plugin copy. Returns source, url, dir and the
+	 * list of weights actually present.
+	 */
 	public static function font_dir_info() {
 		$up = wp_upload_dir();
 
@@ -94,6 +123,10 @@ class DHH_Display_Render {
 		return array( 'source' => 'none', 'url' => '', 'dir' => '', 'weights' => array() );
 	}
 
+	/**
+	 * Build the runtime config injected into the page.
+	 * Filterable via 'dhh_display_config' for per-site overrides.
+	 */
 	private function get_config() {
 		$s = self::get_settings();
 
@@ -118,6 +151,9 @@ class DHH_Display_Render {
 		return apply_filters( 'dhh_display_config', $config );
 	}
 
+	/**
+	 * Build the @font-face CSS for whichever weights are installed.
+	 */
 	private function font_face_css() {
 		$font = self::font_dir_info();
 		if ( empty( $font['weights'] ) ) {
@@ -131,6 +167,9 @@ class DHH_Display_Render {
 		return $css;
 	}
 
+	/**
+	 * Output the standalone kiosk document.
+	 */
 	private function render() {
 		if ( ! headers_sent() ) {
 			header( 'Content-Type: text/html; charset=utf-8' );
@@ -156,6 +195,7 @@ class DHH_Display_Render {
 <meta name="robots" content="noindex, nofollow">
 <title>DHH Panel Products — TV Display</title>
 
+<!-- Speed up the connections to the image CDN and QR service -->
 <link rel="preconnect" href="https://www.dhhpanelproducts.co.uk" crossorigin>
 <link rel="preconnect" href="https://dhhpanelproducts.co.uk" crossorigin>
 <link rel="preconnect" href="https://api.qrserver.com" crossorigin>
@@ -178,7 +218,7 @@ class DHH_Display_Render {
       <img class="logo-main" src="{$logo}" alt="DHH Panel Products">
       <div class="welcome-divider"></div>
       <h1>Welcome to DHH Panel Products</h1>
-      <div class="welcome-sub">UK's Oldest Independent Importer &amp; Distributor of Panel Products</div>
+      <div class="welcome-sub">UK's Largest Independent Importer &amp; Distributor of Panel Products</div>
       <div class="welcome-features">
         <div class="wf-item">
           <div class="wf-icon"><img src="https://www.dhhpanelproducts.co.uk/wp-content/uploads/2021/08/cup.svg" alt=""></div>
@@ -221,7 +261,7 @@ class DHH_Display_Render {
           <li>Flexible, customer-based service</li>
         </ul>
       </div>
-      <div class="about-stats-line">35+ Years in Business <span class="sep">|</span> 350+ Years Combined Experience <span class="sep">|</span> Over 3,000 Product Lines</div>
+      <div class="about-stats-line">35+ Years in Business <span class="sep">|</span> 350+ Years Combined Experience <span class="sep">|</span> 12+ Product Ranges</div>
       <div class="about-safe">The Safe &amp; Legal Choice</div>
       <div class="cert-logos">
         <img src="https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/02/fsc-logo.svg" alt="FSC">
@@ -231,9 +271,7 @@ class DHH_Display_Render {
     </div>
   </div>
 
-  <!-- Slides 3-5: News (built by JS) -->
-
-  <!-- Slide 6: Products -->
+  <!-- Slide 3: Products -->
   <div class="slide slide--products static-slide">
     <div class="top-bar">
       <div class="tb-logo"><img src="{$logo}" alt="DHH"></div>
@@ -262,7 +300,9 @@ class DHH_Display_Render {
     </div>
   </div>
 
-  <!-- Slide 7: Community -->
+  <!-- Slides 4-7: News (built by JS, inserted before Community) -->
+
+  <!-- Slide 8: Community -->
   <div class="slide slide--community static-slide">
     <div class="top-bar">
       <div class="tb-logo"><img src="{$logo}" alt="DHH"></div>
@@ -276,14 +316,14 @@ class DHH_Display_Render {
       </div>
       <div class="community-cards">
         <div class="community-card">
-          <div class="cc-image" style="background-image:url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/06/DHH-Football-Sponsorship-Image.webp')"></div>
+          <div class="cc-image" style="background-image:url('https://dhhtest.wpenginepowered.com/wp-content/uploads/2026/06/Football-Sponsorship-Image.png')"></div>
           <div class="cc-text">
             <h3>Corringham Athletic FC</h3>
-            <p>Proud sponsors since Under 6s. The Yellow team earned promotion this season which was a brilliant achievement for the players, coaches and parents. Founded in 1976, Corringham Athletic continues to do a fantastic job supporting youth football.</p>
+            <p>Proud sponsors since Under 6s. The Yellow team earned promotion this season &mdash; a brilliant achievement for the players, coaches and parents. Founded in 1976, Corringham Athletic continues to do a fantastic job supporting youth football.</p>
           </div>
         </div>
         <div class="community-card">
-          <div class="cc-image" style="background-image:url('https://www.dhhpanelproducts.co.uk/wp-content/uploads/2026/06/DHH-Panels-Low-Resx2.jpg')"></div>
+          <div class="cc-image" style="background-image:url('https://dhhtest.wpenginepowered.com/wp-content/uploads/2026/06/DHH-Panels-Low-Resx2.jpg')"></div>
           <div class="cc-text">
             <h3>Rayleigh Cricket Club</h3>
             <p>Teamwear sponsor until 2027. Over ten years of partnership through our &lsquo;Helping Communities Grow&rsquo; initiative, championing the club and the green spaces our communities depend on.</p>

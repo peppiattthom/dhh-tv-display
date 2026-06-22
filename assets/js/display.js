@@ -88,8 +88,8 @@
         });
 
         wrap.querySelectorAll('.dynamic-slide').forEach(function (el) { el.remove(); });
-        var productsSlide = wrap.querySelector('.slide--products');
-        fresh.forEach(function (slide) { wrap.insertBefore(slide, productsSlide); });
+        var communitySlide = wrap.querySelector('.slide--community');
+        fresh.forEach(function (slide) { wrap.insertBefore(slide, communitySlide); });
 
         updateClocks();
         initSlideshow();

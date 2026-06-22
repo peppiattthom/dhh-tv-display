@@ -86,54 +86,77 @@ class DHH_Display_REST {
 	 * Build the posts payload from the database.
 	 */
 	private function build_posts( $count ) {
-		$query = new WP_Query(
-			array(
-				'posts_per_page'      => $count,
+		$settings    = DHH_Display_Render::get_settings();
+		$pinned_ids  = ! empty( $settings['pinned_posts'] ) ? array_map( 'absint', (array) $settings['pinned_posts'] ) : array();
+		$posts       = array();
+
+		// Fetch pinned posts first, in the saved order.
+		if ( ! empty( $pinned_ids ) ) {
+			foreach ( $pinned_ids as $pid ) {
+				$p = get_post( $pid );
+				if ( $p && 'publish' === $p->post_status && 'post' === $p->post_type ) {
+					$posts[] = $this->format_post( $p->ID );
+				}
+				if ( count( $posts ) >= $count ) break;
+			}
+		}
+
+		// Fill remaining slots with latest posts, excluding pinned ones.
+		$remaining = $count - count( $posts );
+		if ( $remaining > 0 ) {
+			$args = array(
+				'posts_per_page'      => $remaining,
 				'post_status'         => 'publish',
 				'post_type'           => 'post',
 				'orderby'             => 'date',
 				'order'               => 'DESC',
 				'no_found_rows'       => true,
 				'ignore_sticky_posts' => true,
-			)
-		);
-
-		$posts = array();
-
-		if ( $query->have_posts() ) {
-			while ( $query->have_posts() ) {
-				$query->the_post();
-				$post_id = get_the_ID();
-
-				$image_url = has_post_thumbnail( $post_id )
-					? get_the_post_thumbnail_url( $post_id, 'full' )
-					: '';
-
-				$categories = get_the_category( $post_id );
-				$category   = ! empty( $categories ) ? $categories[0]->name : '';
-
-				$raw_excerpt = get_post_field( 'post_excerpt', $post_id );
-				$excerpt = ! empty( $raw_excerpt )
-    			? wp_strip_all_tags( $raw_excerpt )
-    			: wp_strip_all_tags( get_the_excerpt( $post_id ) );
-				if ( strlen( $excerpt ) > 300 ) {
-    			$excerpt = substr( $excerpt, 0, 297 ) . '...';
-				}
-
-				$posts[] = array(
-					'id'             => $post_id,
-					'title'          => esc_html( get_the_title() ),
-					'excerpt'        => esc_html( $excerpt ),
-					'featured_image' => esc_url( $image_url ),
-					'category'       => esc_html( $category ),
-					'permalink'      => esc_url( get_permalink( $post_id ) ),
-					'date'           => esc_html( get_the_date( 'F Y' ) ),
-				);
+			);
+			if ( ! empty( $pinned_ids ) ) {
+				$args['post__not_in'] = $pinned_ids;
 			}
-			wp_reset_postdata();
+			$query = new WP_Query( $args );
+			if ( $query->have_posts() ) {
+				while ( $query->have_posts() ) {
+					$query->the_post();
+					$posts[] = $this->format_post( get_the_ID() );
+				}
+				wp_reset_postdata();
+			}
 		}
 
 		return $posts;
+	}
+
+	/**
+	 * Format a single post for the API response.
+	 */
+	private function format_post( $post_id ) {
+		$image_url = has_post_thumbnail( $post_id )
+			? get_the_post_thumbnail_url( $post_id, 'full' )
+			: '';
+
+		$categories = get_the_category( $post_id );
+		$category   = ! empty( $categories ) ? $categories[0]->name : '';
+
+		$raw_excerpt = get_post_field( 'post_excerpt', $post_id );
+		$excerpt     = ! empty( $raw_excerpt )
+			? wp_strip_all_tags( $raw_excerpt )
+			: wp_strip_all_tags( get_the_excerpt( $post_id ) );
+		if ( strlen( $excerpt ) > 300 ) {
+			$excerpt = substr( $excerpt, 0, 297 ) . '...';
+		}
+
+		return array(
+			'id'             => $post_id,
+			'title'          => esc_html( get_the_title( $post_id ) ),
+			'excerpt'        => esc_html( $excerpt ),
+			'featured_image' => esc_url( $image_url ),
+			'category'       => esc_html( $category ),
+			'permalink'      => esc_url( get_permalink( $post_id ) ),
+			'date'           => esc_html( get_the_date( 'F Y', $post_id ) ),
+		);
 	}
 
 	/**

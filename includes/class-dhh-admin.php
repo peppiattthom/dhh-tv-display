@@ -24,6 +24,9 @@ class DHH_Display_Admin {
 		add_action( 'admin_post_dhh_display_flush_cache', array( $this, 'action_flush_cache' ) );
 		add_action( 'admin_post_dhh_display_flush_rewrite', array( $this, 'action_flush_rewrite' ) );
 		add_action( 'admin_post_dhh_display_install_fonts', array( $this, 'action_install_fonts' ) );
+
+		// AJAX: post search for pinned posts.
+		add_action( 'wp_ajax_dhh_search_posts', array( $this, 'ajax_search_posts' ) );
 	}
 
 	/* Menu */
@@ -60,6 +63,7 @@ class DHH_Display_Admin {
 		$out['refresh_minutes'] = isset( $input['refresh_minutes'] ) ? min( 240, max( 1, (int) $input['refresh_minutes'] ) ) : $out['refresh_minutes'];
 		$out['logo_url']        = isset( $input['logo_url'] ) ? esc_url_raw( trim( $input['logo_url'] ) ) : $out['logo_url'];
 		$out['github_repo']     = isset( $input['github_repo'] ) ? esc_url_raw( trim( $input['github_repo'] ) ) : $out['github_repo'];
+		$out['pinned_posts']    = isset( $input['pinned_posts'] ) ? array_values( array_filter( array_map( 'absint', (array) $input['pinned_posts'] ) ) ) : array();
 
 		// Settings changed → drop the cached payloads so the next poll is fresh.
 		$this->flush_cache();
@@ -188,6 +192,40 @@ class DHH_Display_Admin {
 
 		sort( $installed );
 		return $installed;
+	}
+
+	/**
+	 * AJAX handler: search published posts by title.
+	 */
+	public function ajax_search_posts() {
+		check_ajax_referer( 'dhh_pinned_search', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error();
+		}
+
+		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
+		if ( strlen( $term ) < 2 ) {
+			wp_send_json_success( array() );
+		}
+
+		$results = get_posts( array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => 10,
+			's'              => $term,
+			'orderby'        => 'relevance',
+		) );
+
+		$out = array();
+		foreach ( $results as $p ) {
+			$out[] = array(
+				'id'    => $p->ID,
+				'title' => get_the_title( $p ),
+				'date'  => get_the_date( 'j M Y', $p ),
+			);
+		}
+
+		wp_send_json_success( $out );
 	}
 
 	/* Page */
@@ -327,7 +365,37 @@ class DHH_Display_Admin {
 								<th scope="row"><label for="dhh_post_count">News slides</label></th>
 								<td>
 									<input name="<?php echo esc_attr( DHH_Display_Render::OPTION ); ?>[post_count]" id="dhh_post_count" type="number" min="1" max="10" value="<?php echo esc_attr( $s['post_count'] ); ?>" class="small-text">
-									<p class="description">How many recent posts to rotate (1–10).</p>
+									<p class="description">Total news slides to show (pinned + dynamic fill the rest).</p>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">Pinned posts</th>
+								<td>
+									<div class="dhh-pinned-wrap">
+										<input type="text" id="dhh_pin_search" placeholder="Search posts by title..." class="regular-text" autocomplete="off">
+										<div id="dhh_pin_results" class="dhh-pin-results"></div>
+										<ul id="dhh_pin_list" class="dhh-pin-list">
+											<?php
+											$pinned = isset( $s['pinned_posts'] ) ? (array) $s['pinned_posts'] : array();
+											foreach ( $pinned as $pid ) {
+												$p = get_post( (int) $pid );
+												if ( ! $p ) continue;
+												$opt = esc_attr( DHH_Display_Render::OPTION );
+												echo '<li data-id="' . (int) $pid . '">';
+												echo '<input type="hidden" name="' . $opt . '[pinned_posts][]" value="' . (int) $pid . '">';
+												echo '<span class="dhh-pin-title">' . esc_html( get_the_title( $p ) ) . '</span>';
+												echo '<span class="dhh-pin-date">' . esc_html( get_the_date( 'j M Y', $p ) ) . '</span>';
+												echo '<span class="dhh-pin-actions">';
+												echo '<button type="button" class="dhh-pin-up" title="Move up">&uarr;</button>';
+												echo '<button type="button" class="dhh-pin-down" title="Move down">&darr;</button>';
+												echo '<button type="button" class="dhh-pin-remove" title="Remove">&times;</button>';
+												echo '</span>';
+												echo '</li>';
+											}
+											?>
+										</ul>
+										<p class="description">These posts always appear first, in this order. Remaining slots fill with the latest posts.</p>
+									</div>
 								</td>
 							</tr>
 							<tr>
@@ -451,11 +519,109 @@ class DHH_Display_Admin {
 			.dhh-rotation li { margin: 0 0 4px; }
 			.dhh-preview { width: 640px; max-width: 100%; height: 360px; overflow: hidden; border: 1px solid #dcdcde; border-radius: 8px; background: #111; }
 			.dhh-preview iframe { width: 1920px; height: 1080px; border: 0; transform: scale(0.33333); transform-origin: top left; }
+			/* Pinned posts */
+			.dhh-pinned-wrap { max-width: 500px; }
+			.dhh-pin-results { position: relative; }
+			.dhh-pin-results ul { position: absolute; top: 0; left: 0; right: 0; background: #fff; border: 1px solid #dcdcde; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.12); list-style: none; margin: 0; padding: 0; z-index: 50; max-height: 240px; overflow-y: auto; }
+			.dhh-pin-results li { padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f1; }
+			.dhh-pin-results li:hover { background: #f0f6fc; }
+			.dhh-pin-results .dhh-pr-date { color: #8c8f94; font-size: 12px; }
+			.dhh-pin-list { list-style: none; margin: 10px 0 0; padding: 0; }
+			.dhh-pin-list li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f6f7f7; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 6px; }
+			.dhh-pin-list .dhh-pin-title { flex: 1; font-weight: 600; }
+			.dhh-pin-list .dhh-pin-date { color: #8c8f94; font-size: 12px; white-space: nowrap; }
+			.dhh-pin-list .dhh-pin-actions { display: flex; gap: 4px; }
+			.dhh-pin-list .dhh-pin-actions button { background: none; border: 1px solid #dcdcde; border-radius: 3px; cursor: pointer; padding: 2px 8px; font-size: 14px; line-height: 1; }
+			.dhh-pin-list .dhh-pin-actions button:hover { background: #dcdcde; }
+			.dhh-pin-list:empty::after { content: 'No pinned posts — all slots will be filled with the latest articles.'; color: #8c8f94; font-style: italic; display: block; padding: 8px 0; }
 			@media (max-width: 1100px) {
 				.dhh-grid { grid-template-columns: 1fr; }
 				.dhh-card--status, .dhh-card--tools, .dhh-card--settings { grid-column: 1; grid-row: auto; }
 			}
 		</style>
+		<script>
+		(function() {
+			var searchInput = document.getElementById('dhh_pin_search');
+			var resultsBox  = document.getElementById('dhh_pin_results');
+			var pinnedList  = document.getElementById('dhh_pin_list');
+			var ajaxUrl     = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+			var nonce       = '<?php echo wp_create_nonce( 'dhh_pinned_search' ); ?>';
+			var optName     = '<?php echo esc_attr( DHH_Display_Render::OPTION ); ?>';
+			var debounce    = null;
+
+			searchInput.addEventListener('input', function() {
+				clearTimeout(debounce);
+				var term = this.value.trim();
+				if (term.length < 2) { resultsBox.innerHTML = ''; return; }
+				debounce = setTimeout(function() {
+					fetch(ajaxUrl + '?action=dhh_search_posts&nonce=' + nonce + '&term=' + encodeURIComponent(term))
+						.then(function(r) { return r.json(); })
+						.then(function(data) {
+							if (!data.success || !data.data.length) { resultsBox.innerHTML = ''; return; }
+							var pinned = getPinnedIds();
+							var html = '<ul>';
+							data.data.forEach(function(p) {
+								if (pinned.indexOf(p.id) !== -1) return;
+								html += '<li data-id="' + p.id + '" data-title="' + esc(p.title) + '" data-date="' + esc(p.date) + '">';
+								html += '<span>' + esc(p.title) + '</span><span class="dhh-pr-date">' + esc(p.date) + '</span></li>';
+							});
+							html += '</ul>';
+							resultsBox.innerHTML = html;
+							resultsBox.querySelectorAll('li').forEach(function(li) {
+								li.addEventListener('click', function() { addPin(this); });
+							});
+						});
+				}, 300);
+			});
+
+			function addPin(el) {
+				var id = el.getAttribute('data-id');
+				var title = el.getAttribute('data-title');
+				var date = el.getAttribute('data-date');
+				var li = document.createElement('li');
+				li.setAttribute('data-id', id);
+				li.innerHTML =
+					'<input type="hidden" name="' + optName + '[pinned_posts][]" value="' + id + '">' +
+					'<span class="dhh-pin-title">' + title + '</span>' +
+					'<span class="dhh-pin-date">' + date + '</span>' +
+					'<span class="dhh-pin-actions">' +
+					'<button type="button" class="dhh-pin-up" title="Move up">&uarr;</button>' +
+					'<button type="button" class="dhh-pin-down" title="Move down">&darr;</button>' +
+					'<button type="button" class="dhh-pin-remove" title="Remove">&times;</button>' +
+					'</span>';
+				pinnedList.appendChild(li);
+				bindActions(li);
+				resultsBox.innerHTML = '';
+				searchInput.value = '';
+			}
+
+			function bindActions(li) {
+				li.querySelector('.dhh-pin-remove').addEventListener('click', function() { li.remove(); });
+				li.querySelector('.dhh-pin-up').addEventListener('click', function() {
+					var prev = li.previousElementSibling;
+					if (prev) pinnedList.insertBefore(li, prev);
+				});
+				li.querySelector('.dhh-pin-down').addEventListener('click', function() {
+					var next = li.nextElementSibling;
+					if (next) pinnedList.insertBefore(next, li);
+				});
+			}
+
+			pinnedList.querySelectorAll('li').forEach(function(li) { bindActions(li); });
+
+			function getPinnedIds() {
+				var ids = [];
+				pinnedList.querySelectorAll('input[type=hidden]').forEach(function(inp) { ids.push(parseInt(inp.value)); });
+				return ids;
+			}
+
+			function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+			document.addEventListener('click', function(e) {
+				if (!resultsBox.contains(e.target) && e.target !== searchInput) resultsBox.innerHTML = '';
+			});
+		})();
+		</script>
 		<?php
 	}
 
