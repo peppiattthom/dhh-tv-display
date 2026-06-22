@@ -112,7 +112,10 @@ class DHH_Display_REST {
 				$categories = get_the_category( $post_id );
 				$category   = ! empty( $categories ) ? $categories[0]->name : '';
 
-				$excerpt = wp_strip_all_tags( get_the_excerpt( $post_id ) );
+				$raw_excerpt = get_post_field( 'post_excerpt', $post_id );
+				$excerpt = ! empty( $raw_excerpt )
+    			? wp_strip_all_tags( $raw_excerpt )
+    			: wp_strip_all_tags( get_the_excerpt( $post_id ) );
 				if ( strlen( $excerpt ) > 300 ) {
     			$excerpt = substr( $excerpt, 0, 297 ) . '...';
 				}
